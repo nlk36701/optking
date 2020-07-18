@@ -2,7 +2,7 @@ import os, sys
 import logging
 import logging.config
 
-from .optimize import optimize
+from .optimize import optimize, make_internal_coords
 from . import loggingconfig
 from . import lj_functions
 from .optwrapper import optimize_psi4, optimize_qcengine
