@@ -22,16 +22,21 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install black
+
     - name: Lint
+      id: black-check
       shell: bash
+      continue-on-error: true
       run: black optking --check -l 120
-      if: failure()
+     
+    - name: Fixup
+      if: steps.black-check.outcome == 'failure'
+      shell: bash
       run: |
         black optking -l 120
-        git config --global user.name 'autoblack'
-        git config --global user.email 'cclauss@users.noreply.github.com'
-        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
-        git checkout $GITHUB_HEAD_REF
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+        git add .
         git commit -am "fixup: Format Python code with Black"
         git push
 
