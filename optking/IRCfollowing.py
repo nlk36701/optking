@@ -13,7 +13,7 @@ from .printTools import print_array_string, print_mat_string
 
 
 def step_n_factor(G, g):
-    """Computes distance scaling factor for mass-weighted internals."""
+    """ Computes distance scaling factor for mass-weighted internals. """
     return 1.0 / sqrt(np.dot(g.T, np.dot(G, g)))
 
 
