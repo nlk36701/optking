@@ -43,7 +43,7 @@ jobs:
         black optking -l 120
         git config --global user.name 'github-actions[bot]'
         git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
-        git config --global github.token $ {{ secrets.GITHUB_TOKEN }}
+        git config --global github.token '${{ secrets.GITHUB_TOKEN }}'
         git add .
         git commit -am "fixup: Format Python code with Black"
         git push
