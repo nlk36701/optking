@@ -175,7 +175,7 @@ def conv_check(iterNum, oMolsys, dq, f, energies, q_pivot=None):
 
 
 def test_for_convergence(DE, max_force, rms_force, max_disp, rms_disp):
-    """ Tests whether all conditions for convergence have been met"""
+    """Tests whether all conditions for convergence have been met"""
 
     logger = logging.getLogger(__name__)
     logger.debug("Testing convergence parameters.")

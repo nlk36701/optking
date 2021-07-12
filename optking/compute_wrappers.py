@@ -60,7 +60,7 @@ class ComputeWrapper:
         return inp
 
     def _compute(self, driver):
-        """ Abstract style method for child classes"""
+        """Abstract style method for child classes"""
         pass
 
     def compute(self, geom, driver, return_full=True, print_result=False):

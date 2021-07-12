@@ -142,7 +142,7 @@ class OptHelper(object):
         return
 
     def energy_gradient_hessian(self):
-        """E and gX must be set by the user before calling this method. """
+        """E and gX must be set by the user before calling this method."""
 
         self.compute()
         self.fq = self.molsys.gradient_to_internals(self.gX, -1.0)
@@ -185,7 +185,7 @@ class OptHelper(object):
 
     @gX.setter
     def gX(self, val):
-        """ gX must be set in order to perform an optimization. Cartesian only"""
+        """gX must be set in order to perform an optimization. Cartesian only"""
 
         if val is None:
             self._gX = val

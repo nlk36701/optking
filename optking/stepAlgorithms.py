@@ -103,7 +103,7 @@ def take_step(o_molsys, E, q_forces, H, stepType=None, computer=None, hist=None,
 
 # TODO this method was described as crude do we need to revisit?
 def apply_intrafrag_step_scaling(dq):
-    """ Apply maximum step limit by scaling."""
+    """Apply maximum step limit by scaling."""
     logger = logging.getLogger(__name__)
     trust = op.Params.intrafrag_trust
     if sqrt(np.dot(dq, dq)) > trust:
@@ -115,7 +115,7 @@ def apply_intrafrag_step_scaling(dq):
 
 
 def de_projected(model, step, grad, hess):
-    """ Compute anticpated energy change along one dimension """
+    """Compute anticpated energy change along one dimension"""
     if model == "NR":
         return step * grad + 0.5 * step * step * hess
     elif model == "RFO":

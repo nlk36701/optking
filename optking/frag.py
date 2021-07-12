@@ -189,7 +189,7 @@ class Frag:
     #        print_opt("\n")
 
     def add_h_bonds(self):
-        """ Prepend h_bonds because that's where optking 2 places them """
+        """Prepend h_bonds because that's where optking 2 places them"""
         h_bonds = addIntcos.add_h_bonds(self.geom, self.Z, self.natom)
         for h_bond in h_bonds:
             if stre.Stre(h_bond.A, h_bond.B) in self._intcos:

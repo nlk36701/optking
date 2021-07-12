@@ -13,12 +13,12 @@ from .printTools import print_array_string, print_mat_string
 
 
 def step_n_factor(G, g):
-    """ Computes distance scaling factor for mass-weighted internals. """
+    """Computes distance scaling factor for mass-weighted internals."""
     return 1.0 / sqrt(np.dot(g.T, np.dot(G, g)))
 
 
 def irc_de_projected(step_size, grad, hess):
-    """ Compute anticipated energy change along one dimension """
+    """Compute anticipated energy change along one dimension"""
     return step_size * grad + 0.5 * step_size * step_size * hess
 
 

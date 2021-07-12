@@ -27,7 +27,7 @@ class Weight(object):
 
 
 class RefPoint(object):
-    """ Collection of weights for a single reference point. """
+    """Collection of weights for a single reference point."""
 
     def __init__(self, atoms, coeff):
         self._weights = []
