@@ -1,16 +1,13 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  workflow_run: ["Lint"]
+  types:
+    - completed
 
 jobs:
   build:
   
-    # prevent actions from running on both the push to the PR and PR
-    # only run actions on PRs originating from a fork
-    if:
-      github.event_name == 'push' || github.event.pull_request.head.repo.full_name !=
-      github.repository
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -27,7 +24,9 @@ jobs:
 
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
+      with:
+        ref: $ {{ github.event.workflow_run.head_branch }}
 
     - name: Setup Information
       shell: bash
