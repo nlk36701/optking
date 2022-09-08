@@ -331,7 +331,7 @@ class OptParams(object):
         # Keep internal coordinate definition file.
         self.keep_intcos = uod.get("KEEP_INTCOS", False)
         self.linesearch_step = uod.get("LINESEARCH_STEP", 0.100)
-        self.linesearch = uod.get("LINESEARCH", False)
+        self.linesearch = uod.get("LINESEARCH_METHOD", None)
         # Guess at Hessian in steepest-descent direction.
         self.sd_hessian = uod.get("SD_HESSIAN", 1.0)
         #
