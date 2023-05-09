@@ -173,7 +173,17 @@ class Helper(ABC):
         try:
             self.dq, self.step_str = self.opt_manager.take_step(self.fq, self._Hq, self.E, return_str=True)
         except AlgError as e:
+
+            if e.linear_bends or e.linear_torsion:
+                logger.info(
+                    "Saving Hessian in cartesian coordinates. Will transform to new coordinate system"
+                )
+                h_cart = self.molsys.hessian_to_cartesians(self._Hq)
+
             self.opt_manager.alg_error_handler(e)
+
+            if self.opt_manager.erase_hessian:
+                self._Hq = self.molsys.hessian_to_internals(h_cart)
 
         self.new_geom = self.molsys.geom
         self.step_num += 1
@@ -413,6 +423,8 @@ class CustomHelper(Helper):
     def _compute(self):
         """The call to computer in this class is essentially a lookup for the value provided by
         the User."""
+        
+        logger.info("Psi4 is calling compute %s", self.calculations_needed())
 
         if self.HX is None:
             if "hessian" in self.calculations_needed():
@@ -459,6 +471,8 @@ class CustomHelper(Helper):
     def calculations_needed(self):
         """Assume gradient is always needed. Provide tuple with keys for required properties"""
         hessian_protocol = self.opt_manager.get_hessian_protocol()
+
+        logger.info("Optking's hessian protocol %s", hessian_protocol)
 
         if hessian_protocol == "compute":
             return "energy", "gradient", "hessian"

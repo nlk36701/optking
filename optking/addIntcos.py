@@ -434,6 +434,32 @@ def add_cartesian_intcos(intcos, geom):
 
     # return len(intcos) - Norig
 
+def linear_torsion_check(o_molsys):
+    """ Search for all torsions that can't be computed due to a linear bend present in the torsion
+    definition.
+    
+    Returns
+    -------
+    list : tors.Tors containing a linear bend
+
+    """
+
+    linear_torsions = []
+
+    for frag_index, frag in enumerate(o_molsys.fragments):
+        for i, intco, in enumerate(frag.intcos):
+
+            if isinstance(intco, tors.Tors):
+                try:
+                    intco.q(frag.geom)
+                except AlgError as e:
+                    if len(e.linear_torsion) == 0:
+                        raise e
+                    else:
+                        linear_torsions.append(intco)
+
+    return linear_torsions
+
 
 def linear_bend_check(o_molsys):
     """

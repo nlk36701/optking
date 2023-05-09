@@ -4,7 +4,7 @@ import numpy as np
 
 from . import intcosMisc
 from . import optparams as op
-from .addIntcos import linear_bend_check
+from .addIntcos import linear_bend_check, linear_torsion_check
 from .exceptions import AlgError, OptError
 from .linearAlgebra import abs_max, rms, symm_mat_inv
 from .printTools import print_mat_string, print_array_string
@@ -135,8 +135,9 @@ def displace_molsys(molsys, dq_in, fq=None, ensure_convergence=False, return_str
     dq = q_final - q_orig
 
     linear_list = linear_bend_check(molsys)
-    if linear_list:
-        raise AlgError("New linear angles", newLinearBends=linear_list)
+    linear_torsion = linear_torsion_check(molsys)
+    if linear_list or linear_torsion:
+        raise AlgError("New linear angles", new_linear_bends=linear_list, linear_torsion=linear_torsion)
 
     # RAK TODO : remember why I want to return dx and what to do with it.
     if return_str:

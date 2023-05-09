@@ -115,7 +115,6 @@ class OptimizationManager(stepAlgorithms.OptimizationInterface):
         self.requires = self.update_requirements()
         self.current_requirements = self.update_requirements()
         self.params = params
-        self.erase_hessian = False
         self.check_linesearch = True
         self.error = None
 
@@ -320,7 +319,7 @@ class OptimizationManager(stepAlgorithms.OptimizationInterface):
 
         if self.erase_hessian is True:
             self.erase_hessian = False
-            return "compute" if self.params.full_hess_every > 0 else "guess"
+            return "compute" if self.params.full_hess_every > 0 else "update"
 
         if self.params.cart_hess_read:
             return "compute"
@@ -343,10 +342,11 @@ class OptimizationManager(stepAlgorithms.OptimizationInterface):
 
         return protocol
 
-    def clear(self):
+    def clear(self, erase_intcos=True):
         """Reset history (inculding all steps) and molecule"""
+        if erase_intcos:
+            self.molsys.intcos = []
         self.history.steps = []
-        self.molsys.intcos = []
         self.step_number = 0
         self.history.steps_since_last_hessian = 0
         self.history.consecutive_backsteps = 0
@@ -354,18 +354,25 @@ class OptimizationManager(stepAlgorithms.OptimizationInterface):
     def alg_error_handler(self, error):
         """consumes an AlgError. Takes appropriate action"""
         logger.error(" Caught AlgError exception\n")
-        eraseIntcos = False
+        erase_intcos = False
 
-        if error.linearBends:
+        if error.linear_bends or error.linear_torsion:
+
+            for l in error.linear_torsion:
+                
+                iF = addIntcos.check_fragment(l.atoms, self.molsys)
+                F = self.molsys.fragments[iF]
+                F.intcos = intcosMisc.remove_torsion_add_cart(l.atoms, F.intcos)
+
             # New linear bends detected; Add them, and continue at current level.
             # from . import bend # import not currently being used according to IDE
-            for l in error.linearBends:
+            for l in error.linear_bends:
                 if l.bend_type == "LINEAR":  # no need to repeat this code for "COMPLEMENT"
                     iF = addIntcos.check_fragment(l.atoms, self.molsys)
                     F = self.molsys.fragments[iF]
                     intcosMisc.remove_old_now_linear_bend(l.atoms, F.intcos)
                     F.add_intcos_from_connectivity()
-            eraseHistory = True
+            erase_history = True
         elif self.params.dynamic_level == self.params.dynamic_level_max:
             logger.critical("\n\t Current algorithm/dynamic_level is %d.\n" % self.params.dynamic_level)
             logger.critical("\n\t Alternative approaches are not available or turned on.\n")
@@ -374,22 +381,29 @@ class OptimizationManager(stepAlgorithms.OptimizationInterface):
             self.params.dynamic_level += 1
             logger.warning("\n\t Increasing dynamic_level algorithm to %d.\n" % self.params.dynamic_level)
             logger.warning("\n\t Erasing old history, hessian, intcos.\n")
-            eraseIntcos = True
-            eraseHistory = True
+            erase_intcos = True
+            erase_history = True
             self.params.update_dynamic_level_params(self.params.dynamic_level)
 
         logger.info("Printing the parameters %s", self.params)
 
-        if eraseIntcos:
+        if erase_intcos:
             logger.warning(" Erasing coordinates.\n")
             for f in self.molsys.fragments:
                 del f.intcos[:]
             self.molsys._dimer_intcos = []
 
-        if eraseHistory:
+        if erase_history:
             logger.warning(" Erasing history.\n")
-            self.clear()
-            self.erase_hessian = True
+            self.clear(erase_intcos=erase_intcos)
+            
+            if self.params.full_hess_every >= 0:
+                self.save_hessian = True
+            else:
+                self.erase_hessian = True
+                
+            if self.params.full_hess_every == 0:
+                self.params.full_hess_every = -1
 
         self.error = "AlgError"
 

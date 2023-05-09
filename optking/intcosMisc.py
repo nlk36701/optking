@@ -45,6 +45,15 @@ def tors_contains_bend(b, t):
     ]
 
 
+def remove_torsion_add_cart(atoms, intcos):
+    """ Copy intcos to a new list excluding the torsion defined by atoms """
+
+    d = tors.Tors(*atoms)
+    logger.info("Torsion %s contains linear bends. Replacing with cartesian coordinates", d)
+
+    intcos = [coord for coord in intcos if coord != d]
+    return intcos
+
 def remove_old_now_linear_bend(atoms, intcos):
     """For given bend [A,B,C], remove any regular bends as well as any torsions
     which contain it
