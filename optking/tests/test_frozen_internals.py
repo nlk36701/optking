@@ -64,11 +64,11 @@ def test_butane_frozen(check_iter):
     psi4_options = {
         "basis": "6-31G",
         "g_convergence": "gau_tight",
-        "freeze_all_dihedrals": True,
     }
     psi4.set_options(psi4_options)
 
-    result = optking.optimize_psi4("scf")
+    tmp = {"freeze_all_dihedrals": True,}
+    result = optking.optimize_psi4("scf", **tmp)
     E1 = result["energies"][-1]  # TEST
 
     psi4.core.clean_options()
@@ -119,6 +119,8 @@ def test_butane_skip_frozen(check_iter):
     psi4_options = {
         "basis": "6-31G",
         "g_convergence": "gau_tight",
+    }
+    tmp = {
         "freeze_all_dihedrals": True,
         "unfreeze_dihedrals": """
             8 2 4 12
@@ -126,12 +128,11 @@ def test_butane_skip_frozen(check_iter):
             8 2 4 14
             3 1 2 8
             5 1 2 8
-            6 1 2 8
-        """
-    }
+            6 1 2 8"""}
+
     psi4.set_options(psi4_options)
 
-    result = optking.optimize_psi4("scf")
+    result = optking.optimize_psi4("scf", **tmp)
     E1 = result["energies"][-1]  # TEST
 
     psi4.core.clean_options()
