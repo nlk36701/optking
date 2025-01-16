@@ -42,7 +42,9 @@ def connectivity_from_distances(geom, Z, covalent_connect=1.3):
     C = np.zeros((len(geom), len(geom)), bool)
     for i, j in combinations(range(nat), 2):
         R = v3d.dist(geom[i], geom[j])
-        Rcov = qcel.covalentradii.get(Z[i], missing=4.0) + qcel.covalentradii.get(Z[j], missing=4.0)
+        Rcov = qcel.covalentradii.get(Z[i], missing=4.0) + qcel.covalentradii.get(
+            Z[j], missing=4.0
+        )
         # logger.debug("Checking atoms %d (Z=%d) and %d (Z=%d); R: %.3f; Rcov: %.3f; %s" %(i,
         #              Z[i],j,Z[j],R,Rcov, 'Y' if (R<op.Params.covalent_connect*Rcov) else 'N'))
         if R < covalent_connect * Rcov:
@@ -73,7 +75,7 @@ def add_auxiliary_bonds(connectivity, intcos, geom, Z):
     """
     radii = qcel.covalentradii  # these are in bohr
     Natom = len(geom)  # also in bohr
-    Nadded=0
+    Nadded = 0
 
     for a, b in combinations(range(Natom), 2):
         # No auxiliary bonds involving H atoms
@@ -89,28 +91,31 @@ def add_auxiliary_bonds(connectivity, intcos, geom, Z):
         omit = False
         # Omit auxiliary bonds between a and b, if a-c-b
         for c in range(Natom):
-            if c not in [a,b]:
+            if c not in [a, b]:
                 if connectivity[a][c] and connectivity[b][c]:
                     omit = True
                     break
-        if omit: continue
+        if omit:
+            continue
 
         # Omit auxiliary bonds between a and b, if a-c-d-b
         for c in range(Natom):
-            if c not in [a,b]:
+            if c not in [a, b]:
                 if connectivity[c][a]:
                     for d in range(Natom):
-                        if d not in [a,b,c]:
-                             if connectivity[d][c] and connectivity[d][b]:
-                                 omit = True
-                                 break
-                    if omit: break
-        if omit: continue
+                        if d not in [a, b, c]:
+                            if connectivity[d][c] and connectivity[d][b]:
+                                omit = True
+                                break
+                    if omit:
+                        break
+        if omit:
+            continue
 
         s = stre.Stre(a, b)
         if s not in intcos:
-            logger.info("Adding auxiliary bond %d - %d" % (a+1,b+1))
-            logger.info("Rcov = %10.5f; R = %10.5f; R/Rcov = %10.5f" % (Rcov, R, R/Rcov))
+            logger.info("Adding auxiliary bond %d - %d" % (a + 1, b + 1))
+            logger.info("Rcov = %10.5f; R = %10.5f; R/Rcov = %10.5f" % (Rcov, R, R / Rcov))
             intcos.append(s)
             Nadded += 1
 
@@ -280,7 +285,6 @@ def add_tors_from_connectivity(C, intcos, geom):
         if C[i, j]:
             for k in range(Natom):
                 if C[k, j] and k != i:
-
                     # ensure i-j-k is not collinear; that a regular such bend exists
                     b = bend.Bend(i, j, k)
                     if b not in intcos:
@@ -288,7 +292,6 @@ def add_tors_from_connectivity(C, intcos, geom):
 
                     for l in range(i + 1, Natom):
                         if C[l, k] and l != j:
-
                             # ensure j-k-l is not collinear
                             b = bend.Bend(j, k, l)
                             if b not in intcos:
@@ -314,7 +317,6 @@ def add_tors_from_connectivity(C, intcos, geom):
                     nbonds = sum(C[m])
 
                     if nbonds == 2:  # Nothing else is bonded to m
-
                         # look for an 'I' for I-J-[m]-k-L such that I-J-K is not collinear
                         J = j
                         i = 0
@@ -381,7 +383,7 @@ def add_oofp_from_connectivity(C, intcos, geom):
     for T in terminal_atoms:
         vertex_atoms.append(np.where(C[T])[0][0])
 
-    for (T, V) in zip(terminal_atoms, vertex_atoms):
+    for T, V in zip(terminal_atoms, vertex_atoms):
         if Nneighbors[V] < 3:
             pass
         # Find at least 2 other/side atoms
@@ -417,14 +419,14 @@ def add_oofp_from_connectivity(C, intcos, geom):
             if not covered:
                 try:
                     im_tors = improper_torsion_around_oofp(
-                        coord.atoms[1],
-                        coord.atoms[0],
-                        coord.atoms[2],
-                        coord.atoms[3]
+                        coord.atoms[1], coord.atoms[0], coord.atoms[2], coord.atoms[3]
                     )
                     intcos.append(im_tors)
                 except AlgError:
-                    raise AlgError("Tried to add out-of-plane angles but couldn't evaluate all of them.", oofp_failures=oofp.Oofp(T, V, side1, side2))
+                    raise AlgError(
+                        "Tried to add out-of-plane angles but couldn't evaluate all of them.",
+                        oofp_failures=oofp.Oofp(T, V, side1, side2),
+                    )
 
     return
 
@@ -478,7 +480,7 @@ def linear_bend_check(o_molsys):
                 A, B, C = intco.A, intco.B, intco.C
 
                 # <ABC < 0.  A-C-B should be linear bends.
-                if new_val < 0.0:
+                if new_val < np.pi - op.Params.linear_bend_threshold:
                     linear_bends.append(bend.Bend(A, C, B, bend_type="LINEAR"))
                     linear_bends.append(bend.Bend(A, C, B, bend_type="COMPLEMENT"))
 
@@ -488,10 +490,16 @@ def linear_bend_check(o_molsys):
                     linear_bends.append(bend.Bend(A, B, C, bend_type="COMPLEMENT"))
 
         missing_bends = [b for b in linear_bends if b not in frag.intcos]
-        bend_report = [f"{b}, already present.\n" if b not in missing_bends else f"{b}, missing.\n" for b in linear_bends]
+        bend_report = [
+            f"{b}, already present.\n" if b not in missing_bends else f"{b}, missing.\n"
+            for b in linear_bends
+        ]
 
         if missing_bends:
-            logger.warning("\n\tThe following linear bends should be present:\n %s", "\t".join(bend_report))
+            logger.warning(
+                "\n\tThe following linear bends should be present:\n %s",
+                "\t".join(bend_report),
+            )
         # Need to reset this or linear bends will be rechecked for alternate fragments
         linear_bends = []
 
@@ -663,7 +671,9 @@ def frozen_tors_from_input(frozen_tors_list, o_molsys):
         if len(T) != 4:
             raise OptError("Num. of atoms in frozen torsion should be 4.")
 
-        torsAngle = tors.Tors(T[0] - 1, T[1] - 1, T[2] - 1, T[3] - 1, constraint="frozen")
+        torsAngle = tors.Tors(
+            T[0] - 1, T[1] - 1, T[2] - 1, T[3] - 1, constraint="frozen"
+        )
         f = check_fragment(torsAngle.atoms, o_molsys)
         try:
             I = o_molsys.fragments[f].intcos.index(torsAngle)
@@ -738,7 +748,9 @@ def frozen_oofp_from_input(frozenOofpList, o_molsys):
         if len(T) != 4:
             raise OptError("Num. of atoms in frozen out-of-plane should be 4.")
 
-        oofpAngle = oofp.Oofp(T[0] - 1, T[1] - 1, T[2] - 1, T[3] - 1, constraint="frozen")
+        oofpAngle = oofp.Oofp(
+            T[0] - 1, T[1] - 1, T[2] - 1, T[3] - 1, constraint="frozen"
+        )
         f = check_fragment(oofpAngle.atoms, o_molsys)
         try:
             I = o_molsys.fragments[f].intcos.index(oofpAngle)
@@ -889,7 +901,9 @@ def check_fragment(atom_list, o_molsys):
     """
     fragList = o_molsys.atom_list2unique_frag_list(atom_list)
     if len(fragList) != 1:
-        logger.error("Coordinate contains atoms in different fragments. Not currently supported.\n")
+        logger.error(
+            "Coordinate contains atoms in different fragments. Not currently supported.\n"
+        )
         raise OptError("Atom list contains multiple fragments.")
     return fragList[0]
 
@@ -944,8 +958,9 @@ def add_constrained_intcos(o_molsys):
     if op.Params.freeze_all_dihedrals:
         freeze_all_torsions(o_molsys, op.Params.unfreeze_dihedrals)
 
+
 def freeze_all_torsions(molsys, skipped_torsions=[]):
-    """ Freeze all intrafragment torsions.
+    """Freeze all intrafragment torsions.
     Parameters
     ----------
     molsys: molsys.Molsys
@@ -970,9 +985,10 @@ def freeze_all_torsions(molsys, skipped_torsions=[]):
         except ValueError:
             logger.info(
                 "dihedral angle %s was unfrozen but was not present - adding it.",
-                new_tors
+                new_tors,
             )
             frag.intcos.append(new_tors)
+
 
 def add_dimer_frag_intcos(o_molsys):
     # Look for coordinates in the following order:
@@ -985,7 +1001,6 @@ def add_dimer_frag_intcos(o_molsys):
 
     input = op.Params.interfrag_coords
     if input is not None:
-
         logger.debug("%s", input)
 
         # Place input in iterable for consistency
@@ -1016,7 +1031,9 @@ def add_dimer_frag_intcos(o_molsys):
                 )
 
             df = dimerfrag.DimerFrag.fromUserDict(dict_val)
-            df.update_reference_geometry(o_molsys.frag_geom(df.A_idx), o_molsys.frag_geom(df.B_idx))
+            df.update_reference_geometry(
+                o_molsys.frag_geom(df.A_idx), o_molsys.frag_geom(df.B_idx)
+            )
             o_molsys.dimer_intcos.append(df)
 
     elif op.Params.frag_ref_atoms is not None:
@@ -1049,41 +1066,57 @@ def add_dimer_frag_intcos(o_molsys):
             # Find ref. pt. 2 on A.
             if not o_molsys.fragments[A].is_atom():
                 for i in range(o_molsys.fragments[A].natom):
-                    if i == refA1 or are_collinear(xyzA[i], xyzA[refA1], xyzB[refB1], col_tol):
+                    if i == refA1 or are_collinear(
+                        xyzA[i], xyzA[refA1], xyzB[refB1], col_tol
+                    ):
                         continue
                     refA2 = i
                     frag_ref_atomsA.append([refA2])
                     break
                 else:
-                    raise OptError("could not find 2nd atom on fragment {:d}".format(A + 1))
+                    raise OptError(
+                        "could not find 2nd atom on fragment {:d}".format(A + 1)
+                    )
             # Find ref. pt. 2 on B.
             if not o_molsys.fragments[B].is_atom():
                 for i in range(o_molsys.fragments[B].natom):
-                    if i == refB1 or are_collinear(xyzB[i], xyzB[refB1], xyzA[refA1], col_tol):
+                    if i == refB1 or are_collinear(
+                        xyzB[i], xyzB[refB1], xyzA[refA1], col_tol
+                    ):
                         continue
                     refB2 = i
                     frag_ref_atomsB.append([refB2])
                     break
                 else:
-                    raise OptError("could not find 2nd atom on fragment {:d}".format(B + 1))
+                    raise OptError(
+                        "could not find 2nd atom on fragment {:d}".format(B + 1)
+                    )
             # Find ref. pt. 3 on A.
-            if o_molsys.fragments[A].natom > 2 and not o_molsys.fragments[A].is_linear():
+            if (o_molsys.fragments[A].natom > 2 and not o_molsys.fragments[A].is_linear()):
                 for i in range(o_molsys.fragments[A].natom):
-                    if i in [refA1, refA2] or are_collinear(xyzA[i], xyzA[refA2], xyzA[refA1], col_tol):
+                    if i in [refA1, refA2] or are_collinear(
+                        xyzA[i], xyzA[refA2], xyzA[refA1], col_tol
+                    ):
                         continue
                     frag_ref_atomsA.append([i])
                     break
                 else:
-                    raise OptError("could not find 3rd atom on fragment {:d}".format(A + 1))
+                    raise OptError(
+                        "could not find 3rd atom on fragment {:d}".format(A + 1)
+                    )
             # Find ref. pt. 3 on B.
-            if o_molsys.fragments[B].natom > 2 and not o_molsys.fragments[B].is_linear():
+            if (o_molsys.fragments[B].natom > 2 and not o_molsys.fragments[B].is_linear()):
                 for i in range(o_molsys.fragments[B].natom):
-                    if i in [refB1, refB2] or are_collinear(xyzB[i], xyzB[refB2], xyzB[refB1], col_tol):
+                    if i in [refB1, refB2] or are_collinear(
+                        xyzB[i], xyzB[refB2], xyzB[refB1], col_tol
+                    ):
                         continue
                     frag_ref_atomsB.append([i])
                     break
                 else:
-                    raise OptError("could not find 3rd atom on fragment {:d}".format(A + 1))
+                    raise OptError(
+                        "could not find 3rd atom on fragment {:d}".format(A + 1)
+                    )
 
             df = dimerfrag.DimerFrag(A, frag_ref_atomsA, B, frag_ref_atomsB)
             df.update_reference_geometry(o_molsys.frag_geom(A), o_molsys.frag_geom(B))
@@ -1095,8 +1128,8 @@ def add_dimer_frag_intcos(o_molsys):
 
 
 def improper_torsion_around_oofp(center, a, b, c, geom):
-    """ To help compensate for missing the oofp. Create an improper torsion which goes from
-    T1-T2-C-T3 where T denotes terminal atoms, C denotes the OOFP center, and T1-C-T3 is linear """
+    """To help compensate for missing the oofp. Create an improper torsion which goes from
+    T1-T2-C-T3 where T denotes terminal atoms, C denotes the OOFP center, and T1-C-T3 is linear"""
 
     if v3d.are_collinear(geom[center], geom[a], geom[b]):
         return tors.Tors(a, c, center, b)
