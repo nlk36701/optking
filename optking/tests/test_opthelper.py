@@ -31,7 +31,6 @@ def test_step_by_step():
     opt = optking.CustomHelper(h2o)
 
     for step in range(30):
-
         grad, wfn = psi4.gradient("hf", return_wfn=True)
         opt.gX = grad.np.reshape(-1)
         opt.E = wfn.energy()
@@ -236,7 +235,9 @@ def test_hooh_irc(check_iter):
     json_output = opt.close()
     IRC = json_output["extras"]["irc_rxn_path"]
 
-    assert psi4.compare_values(energy_5th_IRC_pt, IRC[5]["energy"], 6, "Energy of 5th IRC point.")  # TEST
+    assert psi4.compare_values(
+        energy_5th_IRC_pt, IRC[5]["energy"], 6, "Energy of 5th IRC point."
+    )  # TEST
     utils.compare_iterations(json_output, 44, check_iter)
 
 

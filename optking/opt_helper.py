@@ -15,7 +15,13 @@ import qcelemental as qcel
 from . import compute_wrappers, hessian, history, molsys, optwrapper
 from .convcheck import conv_check
 from .exceptions import OptError, AlgError
-from .optimize import get_pes_info, make_internal_coords, optimize, prepare_opt_output, OptimizationManager
+from .optimize import (
+    get_pes_info,
+    make_internal_coords,
+    optimize,
+    prepare_opt_output,
+    OptimizationManager,
+)
 from .misc import import_psi4
 from .printTools import print_geom_grad, welcome
 from . import optparams as op
@@ -91,7 +97,9 @@ class Helper(ABC):
 
         if status == "CONVERGED" and len(energies) > 0:
             if self.params.opt_type != "IRC":
-                conv_table, criteria_table = conv_check(conv_info, self.params.__dict__, str_mode="both")
+                conv_table, criteria_table = conv_check(
+                    conv_info, self.params.__dict__, str_mode="both"
+                )
                 string += conv_table
                 string += criteria_table
                 string += self.history.summary_string()
@@ -103,10 +111,8 @@ class Helper(ABC):
                 conv_info["sub_step_num"] = irc_object.sub_step_number
                 conv_info["iternum"] = irc_object.irc_step_number
                 conv_info["fq"] = irc_object.irc_history._project_forces(
-                                                                    self.fq,
-                                                                    self.molsys,
-                                                                    self.params.linear_algebra_tol
-                                                                )
+                    self.fq, self.molsys, self.params.linear_algebra_tol
+                )
 
             string += conv_check(conv_info, self.params.__dict__, str_mode="table")
 
@@ -175,7 +181,9 @@ class Helper(ABC):
         """Must call compute before calling this method. Takes the next step."""
         self.opt_manager.error = None
         try:
-            self.dq, self.step_str = self.opt_manager.take_step(self.fq, self._Hq, self.E, return_str=True)
+            self.dq, self.step_str = self.opt_manager.take_step(
+                self.fq, self._Hq, self.E, return_str=True
+            )
         except AlgError as e:
             self.opt_manager.alg_error_handler(self._Hq, self.fq, e)
 
@@ -195,7 +203,9 @@ class Helper(ABC):
 
         """
 
-        return self.opt_manager.converged(self.E, self.fq, self.dq, self.step_num, str_mode=str_mode)
+        return self.opt_manager.converged(
+            self.E, self.fq, self.dq, self.step_num, str_mode=str_mode
+        )
 
     def close(self):
         del self._Hq
@@ -221,7 +231,9 @@ class Helper(ABC):
                 if val.shape == (self.molsys.natom, 3):
                     self._gX = np.ravel(val)
                 else:
-                    raise TypeError(f"Gradient must an iterable with shape (3, {self.molsys.natom}) or (1, {ncart})")
+                    raise TypeError(
+                        f"Gradient must an iterable with shape (3, {self.molsys.natom}) or (1, {ncart})"
+                    )
 
     @property
     def HX(self):
@@ -263,7 +275,6 @@ class Helper(ABC):
 
     @staticmethod
     def attempt_fromiter(array):
-
         if not isinstance(array, np.ndarray):
             try:
                 array = np.fromiter(array, dtype=float)
@@ -396,13 +407,17 @@ class CustomHelper(Helper):
                 self.molsys, self.opt_input = molsys.Molsys.from_psi4(mol_src)
             else:
                 try:
-                    self.molsys, self.opt_input = molsys.Molsys.from_psi4(psi4.core.get_active_molecule())
+                    self.molsys, self.opt_input = molsys.Molsys.from_psi4(
+                        psi4.core.get_active_molecule()
+                    )
                 except Exception as error:
                     raise OptError("Failed to grab psi4 molecule as last resort") from error
 
         self.computer.molecule = self.opt_input
         self.build_coordinates()
-        self.opt_manager = OptimizationManager(self.molsys, self.history, self.params, self.computer)
+        self.opt_manager = OptimizationManager(
+            self.molsys, self.history, self.params, self.computer
+        )
         self.opt_manager.step_number = 1
 
     @classmethod
@@ -427,13 +442,16 @@ class CustomHelper(Helper):
                     self.fq = self.molsys.gradient_to_internals(self.gX, -1.0)
                     self._Hq = self.molsys.hessian_to_internals(self.HX)
                     self.fq, self._Hq = self.molsys.apply_external_forces(self.fq, self._Hq)
-                    self.fq, self._Hq = self.molsys.project_redundancies_and_constraints(self.fq, self._Hq)
+                    self.fq, self._Hq = self.molsys.project_redundancies_and_constraints(
+                        self.fq, self._Hq
+                    )
                     self.HX = None
                     self.params.cart_hess_read = False
                     self.params.hessian_file = None
                 else:
                     raise RuntimeError(
-                        "Optking requested a hessian but was not provided one. " "This could be a driver issue"
+                        "Optking requested a hessian but was not provided one. "
+                        "This could be a driver issue"
                     )
             elif self.step_num == 0:
                 logger.debug("Guessing hessian")
@@ -441,7 +459,9 @@ class CustomHelper(Helper):
                 self.gX = self.computer.compute(self.geom, driver="gradient", return_full=False)
                 self.fq = self.molsys.gradient_to_internals(self.gX, -1.0)
                 self.fq, self._Hq = self.molsys.apply_external_forces(self.fq, self._Hq)
-                self.fq, self._Hq = self.molsys.project_redundancies_and_constraints(self.fq, self._Hq)
+                self.fq, self._Hq = self.molsys.project_redundancies_and_constraints(
+                    self.fq, self._Hq
+                )
 
             else:
                 logger.debug("Updating hessian")
@@ -449,7 +469,9 @@ class CustomHelper(Helper):
                 self.fq = self.molsys.gradient_to_internals(self.gX, -1.0)
                 self.fq, self._Hq = self.molsys.apply_external_forces(self.fq, self._Hq)
                 self._Hq = self.history.hessian_update(self._Hq, self.fq, self.molsys)
-                self.fq, self._Hq = self.molsys.project_redundancies_and_constraints(self.fq, self._Hq)
+                self.fq, self._Hq = self.molsys.project_redundancies_and_constraints(
+                    self.fq, self._Hq
+                )
         else:
             result = self.computer.compute(self.geom, driver="hessian")
             self.HX = self.computer.external_hessian
@@ -594,7 +616,9 @@ class EngineHelper(Helper):
         self.computer = optwrapper.make_computer(self.opt_input, "qc")
         self.computer_type = "qc"
         self.build_coordinates()
-        self.opt_manager = OptimizationManager(self.molsys, self.history, self.params, self.computer)
+        self.opt_manager = OptimizationManager(
+            self.molsys, self.history, self.params, self.computer
+        )
 
     @classmethod
     def from_dict(cls, d):
@@ -606,7 +630,6 @@ class EngineHelper(Helper):
         return helper
 
     def _compute(self):
-
         hessian_protocol = self.opt_manager.get_hessian_protocol(self.step_num)
         protocol = hessian_protocol["protocol"]
         requires = self.opt_manager.opt_method.requires()

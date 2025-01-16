@@ -177,8 +177,7 @@ class IRCHistory(object):
         index = -1 if step is None else step
         pindex = (len(self.irc_points) - 1) if step is None else step
         logger.debug(
-            "Adding pivot point (index %d) for finding rxnpath point %d"
-            % (pindex, pindex + 1)
+            "Adding pivot point (index %d) for finding rxnpath point %d" % (pindex, pindex + 1)
         )
         self.irc_points[index].add_pivot(q_p, x_p)
 
@@ -284,7 +283,7 @@ class IRCHistory(object):
         logger.info("Change in energy from last point %.4e", d_energy)
         if overlap < -0.7:
             return True
-        if (abs(self.line_dist(step=-1) - self.line_dist(step=-2)) < self.step_size * 1e-3):
+        if abs(self.line_dist(step=-1) - self.line_dist(step=-2)) < self.step_size * 1e-3:
             return True
         # AH Found to cause early termination in some test cases
         # elif overlap < 0.0 and d_energy > 0.0 :

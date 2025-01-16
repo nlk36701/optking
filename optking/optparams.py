@@ -7,10 +7,18 @@
 import logging
 
 from .exceptions import AlgError, OptError
-from .misc import int_float_list, int_fx_string, int_list, int_xyz_float_list, int_xyz_fx_string, tokenize_input_string
+from .misc import (
+    int_float_list,
+    int_fx_string,
+    int_list,
+    int_xyz_float_list,
+    int_xyz_fx_string,
+    tokenize_input_string,
+)
 from . import log_name
 
 logger = logging.getLogger(f"{log_name}{__name__}")
+
 
 # Class for enumerated string options.
 def string_option(storage_name):
@@ -57,7 +65,7 @@ allowedStringOptions = {
     "interfrag_mode": ("FIXED", "PRINCIPAL_AXES"),
     "interfrag_hess": ("DEFAULT", "FISCHER_LIKE"),
     "conjugate_gradient_type": ("FLETCHER", "DESCENT", "POLAK"),
-    "irc_mode": ("NORMAL", "CONFIRM")
+    "irc_mode": ("NORMAL", "CONFIRM"),
 }
 
 # def enum_key( enum_type, value):
@@ -115,7 +123,7 @@ class OptParams(object):
         # variation of steepest descent step size
         self.steepest_descent_type = uod.get("STEEPEST_DESCENT_TYPE", "OVERLAP")
         # Conjugate gradient step types. See wikipedia on Nonlinear_conjugate_gradient
-        # "POLAK" for Polak-Ribiere. Polak, E.; Ribière, G. (1969). 
+        # "POLAK" for Polak-Ribiere. Polak, E.; Ribière, G. (1969).
         # Revue Française d'Automatique, Informatique, Recherche Opérationnelle. 3 (1): 35–43.
         # "FLETCHER" for Fletcher-Reeves.  Fletcher, R.; Reeves, C. M. (1964).
         self.conjugate_gradient_type = uod.get("CONJUGATE_GRADIENT_TYPE", "FLETCHER")
@@ -317,9 +325,9 @@ class OptParams(object):
         # principal axes or fixed linear combinations of atoms.
         self.interfrag_mode = uod.get("INTERFRAG_MODE", "FIXED")
         # Do add bond coordinates at nearby atoms for non-bonded systems?
-        self.add_auxiliary_bonds = uod.get('ADD_AUXILIARY_BONDS', False)
+        self.add_auxiliary_bonds = uod.get("ADD_AUXILIARY_BONDS", False)
         # This factor times standard covalent distance is used to add extra stretch coordinates.
-        self.auxiliary_bond_factor = uod.get('AUXILIARY_BOND_FACTOR', 2.5)
+        self.auxiliary_bond_factor = uod.get("AUXILIARY_BOND_FACTOR", 2.5)
         # Do use 1/R for the interfragment stretching coordinate instead of R?
         self.interfrag_dist_inv = uod.get("INTERFRAG_DIST_INV", False)
         # Used for determining which atoms in a system are too collinear to
@@ -472,7 +480,7 @@ class OptParams(object):
 
         # Threshold for which entries in diagonalized redundant matrix are kept and
         # inverted while computing a generalized inverse of a matrix
-        self.redundant_eval_tol = 1.0e-10 # to be deprecated.
+        self.redundant_eval_tol = 1.0e-10  # to be deprecated.
 
         # threshold for which eigenvalues, eigenvector values, and other floating point
         # values are considered to be zero. Silences numeric noise that can cause issues
@@ -588,8 +596,6 @@ class OptParams(object):
             self.conv_rms_disp = 4.0e-4
             self.i_rms_disp = True
 
-
-
         # ---  Specific optimization criteria
         if "MAX_FORCE_G_CONVERGENCE" in uod:
             self.i_untampered = False
@@ -635,7 +641,7 @@ class OptParams(object):
         return setattr(self, key, value)
 
     def update_dynamic_level_params(self, run_level):
-        logger = logging.getLogger(__name__)                                                                                        #TODO?
+        logger = logging.getLogger(__name__)  # TODO?
         """
         *dynamic  step   coord   trust      backsteps         criteria
         * run_level                                           for downmove    for upmove
@@ -660,7 +666,9 @@ class OptParams(object):
             self.opt_coordinates = "REDUNDANT"
             self.consecutiveBackstepsAllowed = 0
             self.step_type = "RFO"
-            logger.info("Going to run_level 1: Red. Int., RFO, no backsteps, default, dynamic trust. ~")
+            logger.info(
+                "Going to run_level 1: Red. Int., RFO, no backsteps, default, dynamic trust. ~"
+            )
         elif run_level == 2:
             self.opt_coordinates = "REDUNDANT"
             self.consecutiveBackstepsAllowed = 2
@@ -676,7 +684,9 @@ class OptParams(object):
             self.intrafrag_trust = 0.1
             self.intrafrag_trust_min = 0.1
             self.intrafrag_trust_max = 0.1
-            logger.warning("Going to run_level 3: Red. Int. + XYZ, RFO, 2 backstep, smaller trust. ~")
+            logger.warning(
+                "Going to run_level 3: Red. Int. + XYZ, RFO, 2 backstep, smaller trust. ~"
+            )
         elif run_level == 4:
             self.opt_coordinates = "CARTESIAN"
             self.consecutiveBackstepsAllowed = 2

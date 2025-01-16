@@ -2,10 +2,10 @@ import psi4
 import optking
 from .utils import utils
 
+
 #! B3LYP cc-pVDZ geometry optimzation of phenylacetylene, starting from
 #! not quite linear structure
 def test_b3lyp_phenylacetylene(check_iter):
-
     phenylacetylene = psi4.geometry(
         """
       0 1

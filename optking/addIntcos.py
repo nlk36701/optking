@@ -42,9 +42,7 @@ def connectivity_from_distances(geom, Z, covalent_connect=1.3):
     C = np.zeros((len(geom), len(geom)), bool)
     for i, j in combinations(range(nat), 2):
         R = v3d.dist(geom[i], geom[j])
-        Rcov = qcel.covalentradii.get(Z[i], missing=4.0) + qcel.covalentradii.get(
-            Z[j], missing=4.0
-        )
+        Rcov = qcel.covalentradii.get(Z[i], missing=4.0) + qcel.covalentradii.get(Z[j], missing=4.0)
         # logger.debug("Checking atoms %d (Z=%d) and %d (Z=%d); R: %.3f; Rcov: %.3f; %s" %(i,
         #              Z[i],j,Z[j],R,Rcov, 'Y' if (R<op.Params.covalent_connect*Rcov) else 'N'))
         if R < covalent_connect * Rcov:
@@ -671,9 +669,7 @@ def frozen_tors_from_input(frozen_tors_list, o_molsys):
         if len(T) != 4:
             raise OptError("Num. of atoms in frozen torsion should be 4.")
 
-        torsAngle = tors.Tors(
-            T[0] - 1, T[1] - 1, T[2] - 1, T[3] - 1, constraint="frozen"
-        )
+        torsAngle = tors.Tors(T[0] - 1, T[1] - 1, T[2] - 1, T[3] - 1, constraint="frozen")
         f = check_fragment(torsAngle.atoms, o_molsys)
         try:
             I = o_molsys.fragments[f].intcos.index(torsAngle)
@@ -748,9 +744,7 @@ def frozen_oofp_from_input(frozenOofpList, o_molsys):
         if len(T) != 4:
             raise OptError("Num. of atoms in frozen out-of-plane should be 4.")
 
-        oofpAngle = oofp.Oofp(
-            T[0] - 1, T[1] - 1, T[2] - 1, T[3] - 1, constraint="frozen"
-        )
+        oofpAngle = oofp.Oofp(T[0] - 1, T[1] - 1, T[2] - 1, T[3] - 1, constraint="frozen")
         f = check_fragment(oofpAngle.atoms, o_molsys)
         try:
             I = o_molsys.fragments[f].intcos.index(oofpAngle)
@@ -901,9 +895,7 @@ def check_fragment(atom_list, o_molsys):
     """
     fragList = o_molsys.atom_list2unique_frag_list(atom_list)
     if len(fragList) != 1:
-        logger.error(
-            "Coordinate contains atoms in different fragments. Not currently supported.\n"
-        )
+        logger.error("Coordinate contains atoms in different fragments. Not currently supported.\n")
         raise OptError("Atom list contains multiple fragments.")
     return fragList[0]
 
@@ -1031,9 +1023,7 @@ def add_dimer_frag_intcos(o_molsys):
                 )
 
             df = dimerfrag.DimerFrag.fromUserDict(dict_val)
-            df.update_reference_geometry(
-                o_molsys.frag_geom(df.A_idx), o_molsys.frag_geom(df.B_idx)
-            )
+            df.update_reference_geometry(o_molsys.frag_geom(df.A_idx), o_molsys.frag_geom(df.B_idx))
             o_molsys.dimer_intcos.append(df)
 
     elif op.Params.frag_ref_atoms is not None:
@@ -1066,33 +1056,25 @@ def add_dimer_frag_intcos(o_molsys):
             # Find ref. pt. 2 on A.
             if not o_molsys.fragments[A].is_atom():
                 for i in range(o_molsys.fragments[A].natom):
-                    if i == refA1 or are_collinear(
-                        xyzA[i], xyzA[refA1], xyzB[refB1], col_tol
-                    ):
+                    if i == refA1 or are_collinear(xyzA[i], xyzA[refA1], xyzB[refB1], col_tol):
                         continue
                     refA2 = i
                     frag_ref_atomsA.append([refA2])
                     break
                 else:
-                    raise OptError(
-                        "could not find 2nd atom on fragment {:d}".format(A + 1)
-                    )
+                    raise OptError("could not find 2nd atom on fragment {:d}".format(A + 1))
             # Find ref. pt. 2 on B.
             if not o_molsys.fragments[B].is_atom():
                 for i in range(o_molsys.fragments[B].natom):
-                    if i == refB1 or are_collinear(
-                        xyzB[i], xyzB[refB1], xyzA[refA1], col_tol
-                    ):
+                    if i == refB1 or are_collinear(xyzB[i], xyzB[refB1], xyzA[refA1], col_tol):
                         continue
                     refB2 = i
                     frag_ref_atomsB.append([refB2])
                     break
                 else:
-                    raise OptError(
-                        "could not find 2nd atom on fragment {:d}".format(B + 1)
-                    )
+                    raise OptError("could not find 2nd atom on fragment {:d}".format(B + 1))
             # Find ref. pt. 3 on A.
-            if (o_molsys.fragments[A].natom > 2 and not o_molsys.fragments[A].is_linear()):
+            if o_molsys.fragments[A].natom > 2 and not o_molsys.fragments[A].is_linear():
                 for i in range(o_molsys.fragments[A].natom):
                     if i in [refA1, refA2] or are_collinear(
                         xyzA[i], xyzA[refA2], xyzA[refA1], col_tol
@@ -1101,11 +1083,9 @@ def add_dimer_frag_intcos(o_molsys):
                     frag_ref_atomsA.append([i])
                     break
                 else:
-                    raise OptError(
-                        "could not find 3rd atom on fragment {:d}".format(A + 1)
-                    )
+                    raise OptError("could not find 3rd atom on fragment {:d}".format(A + 1))
             # Find ref. pt. 3 on B.
-            if (o_molsys.fragments[B].natom > 2 and not o_molsys.fragments[B].is_linear()):
+            if o_molsys.fragments[B].natom > 2 and not o_molsys.fragments[B].is_linear():
                 for i in range(o_molsys.fragments[B].natom):
                     if i in [refB1, refB2] or are_collinear(
                         xyzB[i], xyzB[refB2], xyzB[refB1], col_tol
@@ -1114,9 +1094,7 @@ def add_dimer_frag_intcos(o_molsys):
                     frag_ref_atomsB.append([i])
                     break
                 else:
-                    raise OptError(
-                        "could not find 3rd atom on fragment {:d}".format(A + 1)
-                    )
+                    raise OptError("could not find 3rd atom on fragment {:d}".format(A + 1))
 
             df = dimerfrag.DimerFrag(A, frag_ref_atomsA, B, frag_ref_atomsB)
             df.update_reference_geometry(o_molsys.frag_geom(A), o_molsys.frag_geom(B))
