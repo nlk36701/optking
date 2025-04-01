@@ -140,10 +140,15 @@ class Frag:
     def connectivity_from_distances(self):
         return addIntcos.connectivity_from_distances(self._geom, self._Z)
 
-    def add_intcos_from_connectivity(self, connectivity=None):
+    def add_intcos_from_connectivity(self, connectivity=None, ignore_coords=[]):
         if connectivity is None:
             connectivity = self.connectivity_from_distances()
-        addIntcos.add_intcos_from_connectivity(connectivity, self._intcos, self._geom)
+        addIntcos.add_intcos_from_connectivity(
+            connectivity,
+            self._intcos,
+            self._geom,
+            ignore_coords=ignore_coords
+        )
         self.add_h_bonds()
 
     def add_auxiliary_bonds(self, connectivity=None):

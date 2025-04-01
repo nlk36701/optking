@@ -165,7 +165,7 @@ class OptParams(object):
         # Maximum step size in bohr or radian along an interfragment coordinate
         self.interfrag_trust = uod.get("INTERFRAG_TRUST", 0.5)
         # Lower bound for dynamic trust radius [a/u]
-        self.interfrag_trust_min = uod.get("INTERFRAG_TRUST_MIN", 0.001)
+        self.interfrag_trust_min = uod.get("INTERFRAG_TRUST_MIN", 1e-5)
         # Upper bound for dynamic trust radius [au]
         self.interfrag_trust_max = uod.get("INTERFRAG_TRUST_MAX", 1.0)
         # Reduce step size as necessary to ensure convergence of back-transformation of
@@ -216,6 +216,7 @@ class OptParams(object):
         self.ranged_bend = int_float_list(tokenize_input_string(ranged), 3, 2)
         # Specify dihedral angles between atoms to be ranged
         ranged = uod.get("RANGED_DIHEDRAL", "")
+        print(f"Ranged received by optking {ranged}")
         self.ranged_dihedral = int_float_list(tokenize_input_string(ranged), 4, 2)
         # Specify out-of-plane angles between atoms to be ranged
         ranged = uod.get("RANGED_OOFP", "")

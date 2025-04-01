@@ -733,7 +733,7 @@ class Molsys(object):
         B = self.Bmat(massWeight)
         return np.dot(B, B.T)
 
-    def gradient_to_internals(self, g_x, coeff=1.0, B=None, use_masses=False, threshold=1e-10):
+    def gradient_to_internals(self, g_x, coeff=1.0, B=None, use_masses=False, threshold=1e-8):
         """Transform cartesian gradient to internals
         Parameters
         ----------
@@ -854,7 +854,7 @@ class Molsys(object):
         Hq = np.dot(Atranspose, np.dot(Hworking, Atranspose.T))
         return Hq
 
-    def project_redundancies_and_constraints(self, fq, H, threshold=1e-10):
+    def project_redundancies_and_constraints(self, fq, H, threshold=1e-8):
         """Project redundancies and constraints out of forces and Hessian"""
         # compute projection matrix = G G^-1
         G = self.Gmat()

@@ -6,7 +6,7 @@ import numpy as np
 
 from .exceptions import OptError
 from .printTools import print_geom_string
-from .linearAlgebra import symm_mat_inv
+from .linearAlgebra import symm_mat_inv, symm_mat_root, rms
 from . import log_name
 from . import addIntcos
 from . import molsys
@@ -265,7 +265,7 @@ class IRCHistory(object):
             return True
         return False
 
-    def test_for_irc_minimum(self, f_q, energy):
+    def test_for_irc_minimum(self, f_q, energy, fq_rms=1e-5):
         """Given current forces, checks if we are at/near a minimum
         Two checks are performed.
         1. If forces are opposite those are previous pivot point
@@ -282,12 +282,17 @@ class IRCHistory(object):
         d_energy = energy - self.energy(step=-2)
         logger.info("Change in energy from last point %.4e", d_energy)
         if overlap < -0.7:
+            logger.info("Overlap of forces with previous rxnpath point %8.4f" % overlap)
             return True
         if abs(self.line_dist(step=-1) - self.line_dist(step=-2)) < self.step_size * 1e-3:
+            logger.info("Displacement along IRC is very small. Likely circling minumum. Quitting")
             return True
-        # AH Found to cause early termination in some test cases
-        # elif overlap < 0.0 and d_energy > 0.0 :
-        #     return True
+        if abs(rms(f_q)) < fq_rms:
+            logger.info("RMS of forces have reached %s. Close to minimum. Qutting.", fq_rms)
+            return True
+        # if overlap < 0.0 and d_energy > 0.0:
+        #     logger.info("Energy has increased and overlap of forces is low")
+            return True
 
         return False
 

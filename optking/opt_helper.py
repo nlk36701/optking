@@ -186,6 +186,10 @@ class Helper(ABC):
             )
         except AlgError as e:
             self.opt_manager.alg_error_handler(self._Hq, self.fq, e)
+            self._Hq = self.opt_manager.H
+            self.fq = self.molsys.gradient_to_internals(self.gX, coeff=-1.0)
+            self.molsys = self.opt_manager.molsys
+            self.HX = self.molsys.hessian_to_cartesians(self._Hq, -1 * self.fq)
 
         self.new_geom = self.molsys.geom
         self.step_num += 1

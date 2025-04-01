@@ -165,6 +165,7 @@ def _test_for_convergence(conv_met, conv_active, return_str=False):
 
     """
 
+    breakpoint()
     if op.Params.i_untampered:
         # flexible_criteria forces this route, but with an adjusted value for an individual criteria
         if "GAU" in op.Params.g_convergence or op.Params.g_convergence == "INTERFRAG_TIGHT":
