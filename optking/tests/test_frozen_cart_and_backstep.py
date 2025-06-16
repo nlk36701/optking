@@ -42,6 +42,7 @@ optking__freeze_params = [
     (opt2, HOOH_E_frozen_O_xyz, 13),
     (opt3, HOOH_E_frozen_H_xyz, 13),
     (opt4, HOOH_E_frozen_H_xyz, 13),
+    # TODO opt4 should converge in 7 steps once redundants are utilized. Fixed in other PR
 ]
 
 

@@ -24,6 +24,7 @@ class ComputeWrapper:
 
     def __init__(self, molecule, model, keywords, program):
         self.molecule = molecule
+        self.molecule.update({'fix_com': True, 'fix_orientation': True})
         self.model = model
         self.keywords = keywords
         self.program = program

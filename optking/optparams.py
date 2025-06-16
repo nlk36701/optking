@@ -216,7 +216,6 @@ class OptParams(object):
         self.ranged_bend = int_float_list(tokenize_input_string(ranged), 3, 2)
         # Specify dihedral angles between atoms to be ranged
         ranged = uod.get("RANGED_DIHEDRAL", "")
-        print(f"Ranged received by optking {ranged}")
         self.ranged_dihedral = int_float_list(tokenize_input_string(ranged), 4, 2)
         # Specify out-of-plane angles between atoms to be ranged
         ranged = uod.get("RANGED_OOFP", "")

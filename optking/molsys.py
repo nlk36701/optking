@@ -104,10 +104,9 @@ class Molsys(object):
         """
 
         import psi4
-
         logger.debug("\tConverting psi4 molecular system to schema")
 
-        if not isinstance(mol, psi4.core.Molecule):
+        if not isinstance(mol, (psi4.core.Molecule, psi4.qcdb.Molecule)):
             logger.critical("from_psi4 cannot handle a non psi4 molecule")
             raise OptError("Cannot make molecular system from this molecule")
 

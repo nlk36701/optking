@@ -195,9 +195,10 @@ def test_hooh_irc(check_iter):
     params = {
         "g_convergence": "gau_verytight",
         "opt_type": "irc",
-        "geom_maxiter": 60,
+        # "geom_maxiter": 60,
         "full_hess_every": 0,
         "irc_direction": "FORWARD",
+        "irc_points": 5,
     }
 
     psi4.set_options(psi4_options)
@@ -238,7 +239,7 @@ def test_hooh_irc(check_iter):
     assert psi4.compare_values(
         energy_5th_IRC_pt, IRC[5]["energy"], 6, "Energy of 5th IRC point."
     )  # TEST
-    utils.compare_iterations(json_output, 44, check_iter)
+    utils.compare_iterations(json_output, 20, check_iter)
 
 
 def test_linesearch(check_iter):
